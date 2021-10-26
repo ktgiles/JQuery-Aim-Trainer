@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<!-- easy timer library from https://albert-gonzalez.github.io/easytimer.js/ -->
+<script src="./easytimer.js-master\dist\easytimer.min.js"></script>
+
+<style>
+.btn-circle {
+  width: 45px;
+  height: 45px;
+  line-height: 45px;
+  text-align: center;
+  padding: 0;
+  border-radius: 50%;
+  background-color: #7989a3;
+}
+
+.btn-circle i {
+  position: relative;
+  top: -1px;
+}
+
+.btn-circle-sm {
+  width: 35px;
+  height: 35px;
+  line-height: 35px;
+  font-size: 0.9rem;
+}
+
+body {
+  background: #cccce6;
+  color: #514B64;
+  min-height: 100vh;
+}
+
+section {
+	background: #7989a3;
+}
+
+.container {
+	min-width: 700px;
+	max-width: 700px;
+}
+
+</style>
+</head>
+
+<title>Aim Trainer</title>
+
+<body>
+
+<!-- top section of page with name, instructions, start button -->
+<div class="jumbotron text-center">
+  <h1>Aim Trainer</h1>
+  <p>Click all red targets as fast as possible!</p>
+  <p>Don't miss - if you click outside a red target, you lose!!!</p>
+</div>
+
+<!--Start game button -->
+<div class="button" id="poop">
+	<button type="button" class="btn btn-primary btn-lg btn-block">Start Game!</button>
+</div>
+<br>
+
+<!-- section to contain all dynamically generated buttons -->
+<section>
+  <div class="container p-5 text-center" id="targets" background-color="white">
+</section>
+
+<!-- section to show current score -->
+<div> 
+	<h4>Your score: </h4>
+</div>
+<div id="stopwatch">
+    <div class="values jumbotron text-center"></div>
+</div>
+
+</body>
+<script>
+
+<!-- random number generator to populate targets -->
+function turnRed() {
+	return Math.floor(Math.random() * 304);
+	}
+	
+<!--instantiate timer -->	
+var timer = new easytimer.Timer();
+
+<!-- on page load -->
+$(document).ready(function () {
+	$("#targets").css('cursor', 'crosshair'); //style crosshair over targets div
+	});
+	
+<!-- on START GAME click -->	
+$( "#poop" ).click(function() {
+
+	<!-- populate buttons and assign each a number id -->
+	var html = "";
+	for (i = 0 ; i < 304 ; i++) //generate all buttons
+			html += "<button class='btn btn-circle btn-circle-sm m-1' id='"+ i +"'></button>";
+	$("#targets").html(html); //put each button into div
+	
+	$(".btn-circle").css('cursor', 'crosshair');//style crosshair over buttons
+	
+	<!-- turn random 10 buttons red -->
+	const reds = []; //array to hold button ids that are red
+	for (var j = 0; j < 10; j++) {
+		var k = turnRed();
+		reds.push(k);		
+		$("#" + k).css("backgroundColor" , "red");
+		}
+	<!-- set all red buttons to id="redboi" -->	
+	for (var b = 0; b < reds.length; b++) {
+		$("#" + reds[b]).attr("id", "redboi");
+		}
+		
+	<!-- set all hidden buttons to id="ghost" --Happy Halloween!-- -->
+	$("button").not("#redboi").attr("id", "ghost") ;
+				
+	<!-- set up stopwatch within appropriate div -->	
+	timer.start({precision: 'secondTenths'});
+	timer.addEventListener('secondTenthsUpdated', function (e) {
+		$('#stopwatch .values').html(timer.getTimeValues().toString(['hours', 'minutes', 'seconds', 'secondTenths']));
+		});
+		
+	<!-- on ghost button click -->
+	$("#targets").on("click", "#ghost", function() {
+		alert( "YOU LOSE!!!!" ); 
+		location.reload(); //reload page 
+		});	
+		
+	}); 
+	
+<!-- on red button click -->
+$("#targets").on("click", "#redboi", function() {
+	$(this).attr("id", "ghost"); //change button id to ghost
+	$(this).css("backgroundColor", "#7989a3"); //change background color so it disappears
+	
+	//if there are no redbois left generate win statement
+	if (!$("#redboi").length) { 
+		var seconds = timer.getTimeValues().seconds;
+		var tenths = timer.getTimeValues().secondTenths;
+		timer.stop();
+		
+		alert( "You Win! Your score is " + seconds + "." + tenths + " seconds");
+		location.reload();//reload page
+		}
+
+	});	
+
+</script>
